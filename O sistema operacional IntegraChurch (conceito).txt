@@ -1,0 +1,21 @@
+O sistema operacional IntegraChurch veio para solucionar uma dor do ministério de Integração das MegasChurch’s , ele automatiza o processo de contato entre membro da Igreja > visitante, proporcionando assim um onboarding mais eficiente, visto que na maioria das vezes os visitantes ao preencherem fichas são deixadas de lado. Este sistema proporciona controle de supervisão, KPI’s de relevância, acompanhamento inteligente. Aqui está a estrutura do IntegraChurch:
+
+# Funcionalidades
+
+O IntegraChurch é dividido em três frentes de atação, são elas, 1° Ficha cadastral (modo PDV), 2° Area do Mensageiro, 3° Area do Admin.
+
+### 1° Ficha cadastral
+
+> A ficha cadastral ela contém os seguintes campos: Nome Completo> Email > Whatsaap> Endereço (com busca de CEP integrada) > Data de Nascimento (com calculo de idade automático) > Sexo > Chek Box “é uma ficha de decisão” “tem desejo de participar de nossas células” - ( A partir daí as demais features do sistema conseguirão fazer a coleta de dados, o intúito é que as fichas sejam direcionadas para os mensageiros, com filtros de matching de sexo, idade, proximidade geográfica, a partir daí o sistema direciona para um mensageiro que está com carga disponivel para entrar em contato com o visitante). Essa feature do sistema, a ficha cadastral, deve ser responsiva para ser preenchida, tanto por um volutário quanto pelo próprio visitante, ela deve ser web , com versão responsiva tanto para tablet, desktop, quanto para Mobile.
+> 
+
+ 
+
+### 2° Area do mensageiro
+
+> A area do mensageiro vai funcionar da seguinte maneira, em um página de acesso web, ele fará login na plataforman(este login não pode ser visto na ficha cadastral) , isso já dirá se ele é admin ou mensageiro. Sendo ele mensageiro, ao acessar sua conta, será capaz de visualizar todo o histórico de visistantes direcionados a ele, em seu dashboard terá KPI’s relevantes para ser acompanhadas, a partir de então, ao clicar no visitante que deseja entrar em contato, ele encontrará um botão de whtsaap em cada visitante, neste botão já direciona para a conversa com o visitante já com uma mensagem “modelo” pronta. Após o contato , o mensageiro já pode selecionar como concluido. (todos os insights retirados do painel do mensageiro devem constar no painel admin).
+> 
+
+### 3° Painel Admin
+
+> Na Area do admin, ele acessa a área asism como o mensageiro, ali ele terá controle e gestão da equipe de mensageiros , conseguira ver desempenho por mensageiro, verá KPI’s relevantes, tanto positivas quanto negativas, ele conseguirá adcionar novos mensageiros, tanto qunato conseguirá remover, ele também será capaz de adcionar novos admins e codernadores (cada m com suas restrições e atribuições de funcionalidades) (cordenador - tem acesso a sua respectiva equipe) (admin tem acesso total). Além de tudo isso neste painel será possivel exportar (CSV) relatórios completos e analiticos, deve ser possivel visualizar uma tabela in line com um aprévia deste relatório.
