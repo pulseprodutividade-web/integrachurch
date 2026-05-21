@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntegraChurch - Área do Mensageiro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- SUPABASE JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+    .dropdown-content { display: none; }
+    .dropdown:hover .dropdown-content, .dropdown:focus-within .dropdown-content { display: block; }
+  </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-neutral-950 text-white min-h-screen flex flex-col relative">
+
+  <div class="fixed inset-0 z-0">
+    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/60668e31-2150-424e-b292-05bfdda254e0_1600w.jpg" alt="Background" class="h-full w-full object-cover opacity-30">
+    <div class="absolute inset-0 bg-gradient-to-tr from-black/90 via-black/60 to-transparent"></div>
+  </div>
+
+  <div class="relative z-10 flex-1 w-full">
+
+    <main id="login-view" class="flex-1 flex items-center justify-center p-4 min-h-screen">
+      <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+          <h2 class="text-white tracking-tight text-4xl font-semibold leading-[1.05]">IntegraChurch</h2>
+          <p class="text-neutral-300 mt-2 text-sm">Área Restrita do Mensageiro / Pastoral</p>
+        </div>
+        <div class="rounded-2xl bg-white/90 backdrop-blur ring-1 ring-black/10 shadow-lg p-5 sm:p-7">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <p class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold">Acesso Cloud</p>
+              <h3 class="mt-1 text-2xl font-semibold tracking-tight text-neutral-900">Faça seu login</h3>
+            </div>
+            <div class="h-10 w-10 rounded-lg bg-neutral-900 text-white flex items-center justify-center shadow">
+              <i data-lucide="shield-check" class="h-5 w-5"></i>
+            </div>
+          </div>
+          <form id="login-form" class="space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-neutral-600">Usuário<span class="text-neutral-400"> *</span></label>
+              <div class="relative mt-1">
+                <i data-lucide="user" class="h-4 w-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input id="login-username" type="text" required class="w-full pl-9 pr-3 py-2.5 text-sm text-neutral-900 rounded-xl ring-1 ring-black/10 outline-none bg-white">
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-neutral-600">Senha<span class="text-neutral-400"> *</span></label>
+              <div class="relative mt-1">
+                <i data-lucide="lock" class="h-4 w-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input id="login-password" type="password" required class="w-full pl-9 pr-3 py-2.5 text-sm text-neutral-900 rounded-xl ring-1 ring-black/10 outline-none bg-white">
+              </div>
+            </div>
+            <div id="login-error" class="hidden text-rose-500 text-xs font-medium text-center mt-2"></div>
+            <button type="submit" id="btn-login-submit" class="w-full mt-2 inline-flex items-center justify-center rounded-xl bg-neutral-900 text-white px-4 py-3 text-sm font-medium hover:bg-neutral-800 transition-colors">
+              Entrar no Painel
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <main id="dashboard-view" class="hidden flex-col p-4 sm:p-8 max-w-7xl mx-auto w-full min-h-screen">
+      <header class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-4 border-b border-white/10 shrink-0 gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-semibold text-white tracking-tight" id="header-title">Painel do Mensageiro</h1>
+          <p class="text-neutral-400 text-sm mt-1">Acompanhe seus visitantes através da Nuvem.</p>
+        </div>
+        <div class="hidden sm:inline-flex items-center gap-3 rounded-2xl bg-white/10 backdrop-blur ring-1 ring-white/15 p-2 pr-3">
+          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-inner">
+            <span class="text-white font-bold text-sm" id="user-initials">M</span>
+          </div>
+          <div class="min-w-0 pr-2">
+            <p class="text-[10px] text-emerald-300 leading-none uppercase font-semibold" id="user-equipe-display">Equipe</p>
+            <p class="text-white font-medium tracking-tight truncate text-sm" id="user-name-display">Carregando...</p>
+          </div>
+          <button id="btn-logout" class="ml-1 inline-flex items-center justify-center rounded-lg bg-black/40 text-neutral-300 p-2 hover:bg-black/60 transition-colors">
+            <i data-lucide="log-out" class="h-4 w-4"></i>
+          </button>
+        </div>
+      </header>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start flex-1 pb-10">
+        <div class="lg:col-span-4 space-y-6">
+          <div class="rounded-2xl bg-white/5 p-5">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="text-white font-medium text-sm">Carga Atual vs Máxima</h3>
+              <i data-lucide="target" class="h-4 w-4 text-emerald-400"></i>
+            </div>
+            <div class="w-full bg-neutral-800 rounded-full h-2 mb-2">
+              <div id="meta-progress" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-2 rounded-full" style="width: 0%"></div>
+            </div>
+            <p class="text-xs text-neutral-400" id="meta-texto"></p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 flex flex-col h-full">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+            <h2 class="text-white text-lg font-semibold">Fichas Designadas</h2>
+            <button onclick="fetchData()" class="text-xs bg-white/10 px-3 py-1.5 rounded-md hover:bg-white/20 transition">Atualizar Dados</button>
+          </div>
+
+          <div class="bg-white/95 rounded-2xl shadow-xl p-2 sm:p-4 overflow-y-auto max-h-[600px] flex-1">
+            <div id="lista-visitantes" class="space-y-3"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div id="feedback-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeFeedbackModal()"></div>
+    <div class="relative w-full max-w-md rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 overflow-hidden">
+      <div class="px-5 py-4 border-b border-neutral-100 flex items-center justify-between bg-neutral-50">
+        <h3 class="text-neutral-900 font-semibold" id="feedback-titulo">Finalizar Atendimento</h3>
+        <button onclick="closeFeedbackModal()" class="text-neutral-400"><i data-lucide="x" class="h-5 w-5"></i></button>
+      </div>
+      <div class="p-5">
+        <p class="text-sm text-neutral-600 mb-4" id="feedback-desc">Registrar o andamento de <strong id="modal-visitante-nome"></strong>:</p>
+        <form id="form-feedback" class="space-y-4">
+          <input type="hidden" id="modal-visitante-id">
+          
+          <div class="space-y-2">
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-neutral-200 cursor-pointer">
+              <input type="radio" name="resultado" value="agendado" required class="text-emerald-600 focus:ring-emerald-500">
+              <span class="text-sm text-neutral-700">Contato Realizado / Agendado</span>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-neutral-200 cursor-pointer">
+              <input type="radio" name="resultado" value="nao_respondeu" class="text-emerald-600">
+              <span class="text-sm text-neutral-700">Não Responde / Telefone Inválido</span>
+            </label>
+          </div>
+
+          <div>
+            <label class="block text-xs text-neutral-600 mb-1">Feedback Detalhado</label>
+            <textarea id="modal-observacao" rows="3" class="w-full p-2 text-sm rounded-xl ring-1 ring-black/10 outline-none resize-none"></textarea>
+          </div>
+
+          <div id="pastor-aviso" class="hidden p-3 bg-purple-50 rounded-xl border border-purple-200">
+             <p class="text-[11px] text-purple-700">Sendo Pastor, ao concluir esta Ficha, ela será enviada para o matching de um Mensageiro Comum.</p>
+          </div>
+
+          <button type="submit" id="btn-save-feedback" class="w-full rounded-xl bg-emerald-600 text-white px-4 py-3 text-sm">
+            Salvar e Enviar para Nuvem
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const supabaseUrl = 'https://txcxqjzkfkkbnegebyjx.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4Y3hxanprZmtrYm5lZ2VieWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjQyOTIsImV4cCI6MjA5NDkwMDI5Mn0.KnxJvGnwGxEumDDZyso8jhCGnLP18Rf_Q3RkHk3ktdM';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    let loggedUser = null;
+    let localFichas = [];
+
+    async function fetchData() {
+      const { data, error } = await supabase.from('fichas').select('*').eq('mensageiroId', loggedUser.id);
+      localFichas = data || [];
+      renderDashboard();
+    }
+
+    // MATCHING SECUNDÁRIO PARA PASTOR REPASSAR
+    async function reatribuirParaMensageiro(fichaAntiga) {
+      const { data: membros } = await supabase.from('membros').select('*').eq('ativo', true).neq('role', 'pastor');
+      const { data: todasFichas } = await supabase.from('fichas').select('mensageiroId, status').eq('status', 'pendente');
+      
+      let elegiveis = membros.filter(m => m.cargaMax > 0 && m.sexo === fichaAntiga.sexo && m.faixasAtendimento.includes(fichaAntiga.faixaEtaria));
+      elegiveis = elegiveis.map(m => {
+        const at = todasFichas.filter(f => f.mensageiroId === m.id).length;
+        return { ...m, cargaAtual: at };
+      }).filter(m => m.cargaAtual < m.cargaMax);
+
+      if(elegiveis.length === 0) return null;
+      let target = elegiveis.filter(m => m.bairro.toLowerCase() === fichaAntiga.bairro.toLowerCase());
+      if(target.length === 0) target = elegiveis;
+      
+      target.sort((a,b)=>a.cargaAtual - b.cargaAtual);
+      return target[0].id;
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      document.getElementById('btn-login-submit').innerText = 'Autenticando...';
+      const u = document.getElementById('login-username').value;
+      const p = document.getElementById('login-password').value;
+      
+      const { data } = await supabase.from('membros').select('*').eq('username', u).eq('senha', p);
+      if(data && data.length > 0) {
+        loggedUser = data[0];
+        document.getElementById('login-view').classList.add('hidden');
+        document.getElementById('dashboard-view').classList.remove('hidden');
+        document.getElementById('dashboard-view').classList.add('flex');
+        
+        document.getElementById('user-name-display').innerText = loggedUser.nome;
+        document.getElementById('user-initials').innerText = loggedUser.nome.charAt(0);
+        document.getElementById('user-equipe-display').innerText = loggedUser.role === 'pastor' ? 'Painel VIP' : loggedUser.equipe;
+        
+        if(loggedUser.role === 'pastor') { document.getElementById('header-title').innerText = "Painel Pastoral"; }
+        
+        fetchData();
+      } else {
+        document.getElementById('login-error').innerText = 'Credenciais Inválidas';
+        document.getElementById('login-error').classList.remove('hidden');
+      }
+      document.getElementById('btn-login-submit').innerText = 'Entrar no Painel';
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => { location.reload(); });
+
+    window.openFeedbackModal = function(id, nome) {
+      document.getElementById('modal-visitante-id').value = id;
+      document.getElementById('modal-visitante-nome').innerText = nome;
+      document.getElementById('form-feedback').reset();
+      
+      if(loggedUser.role === 'pastor') {
+        document.getElementById('pastor-aviso').classList.remove('hidden');
+      } else {
+        document.getElementById('pastor-aviso').classList.add('hidden');
+      }
+      document.getElementById('feedback-modal').classList.remove('hidden');
+    }
+    window.closeFeedbackModal = function() { document.getElementById('feedback-modal').classList.add('hidden'); }
+
+    document.getElementById('form-feedback').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      document.getElementById('btn-save-feedback').innerText = "Enviando...";
+      const id = parseInt(document.getElementById('modal-visitante-id').value);
+      const ficha = localFichas.find(f => f.id === id);
+      const res = document.querySelector('input[name="resultado"]:checked').value;
+      const obs = document.getElementById('modal-observacao').value;
+
+      let novoStatus = 'concluido';
+      let novoMensageiroId = ficha.mensageiroId;
+      let novoFeedback = (ficha.feedback ? ficha.feedback + ' | ' : '') + `[${res.toUpperCase()}] ${obs}`;
+      let isFluxoPastoral = ficha.fluxo_pastoral;
+
+      if(loggedUser.role === 'pastor') {
+        novoStatus = 'pendente';
+        isFluxoPastoral = true;
+        novoMensageiroId = await reatribuirParaMensageiro(ficha);
+      }
+
+      await supabase.from('fichas').update({
+        status: novoStatus,
+        feedback: novoFeedback,
+        fluxo_pastoral: isFluxoPastoral,
+        mensageiroId: novoMensageiroId,
+        timestamp: Date.now()
+      }).eq('id', id);
+
+      closeFeedbackModal();
+      document.getElementById('btn-save-feedback').innerText = "Salvar e Enviar para Nuvem";
+      fetchData();
+    });
+
+    function renderDashboard() {
+      const pendentes = localFichas.filter(v => v.status === 'pendente');
+      const prc = Math.min((pendentes.length / loggedUser.cargaMax)*100, 100);
+      document.getElementById('meta-progress').style.width = `${prc}%`;
+      document.getElementById('meta-texto').innerText = `${pendentes.length} pendentes (Limite: ${loggedUser.cargaMax})`;
+
+      const lc = document.getElementById('lista-visitantes');
+      if(pendentes.length === 0) {
+        lc.innerHTML = `<p class="text-center text-neutral-400 py-10">Você não tem fichas novas.</p>`;
+        return;
+      }
+
+      lc.innerHTML = pendentes.map(v => {
+        let tag = v.decisao ? '<span class="text-[10px] bg-rose-100 text-rose-700 px-1 rounded ml-2">Decisão</span>' : '';
+        if(v.fluxo_pastoral) tag += '<span class="text-[10px] bg-purple-100 text-purple-700 px-1 rounded ml-2">Pastor Atendeu</span>';
+        
+        let msg = encodeURIComponent(`Olá, ${v.nomeVisitante}! Eu sou ${loggedUser.nome}. Vi sua ficha na igreja!`);
+        
+        return `
+          <div class="p-4 border rounded-xl bg-white mb-2 shadow-sm">
+            <h4 class="font-bold text-neutral-900">${v.nomeVisitante} ${tag}</h4>
+            <p class="text-xs text-neutral-500 mb-2">${v.idade} anos | ${v.bairro}</p>
+            ${v.fluxo_pastoral && v.feedback ? `<p class="text-[10px] text-neutral-400 italic bg-neutral-50 p-1 mb-2">Histórico: ${v.feedback}</p>` : ''}
+            <div class="flex gap-2">
+              <a href="https://wa.me/${v.whatsapp}?text=${msg}" target="_blank" class="px-3 py-1 bg-neutral-900 text-white rounded text-xs flex-1 text-center">Chamar WhatsApp</a>
+              <button onclick="openFeedbackModal(${v.id}, '${v.nomeVisitante}')" class="px-3 py-1 bg-emerald-600 text-white rounded text-xs flex-1">Registrar Retorno</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ficha de Visitante — AD Fonte de Vida</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- SUPABASE JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+    .font-outfit { font-family: 'Outfit', sans-serif; }
+    .checkbox-card { transition: all 0.2s ease-in-out; }
+    .checkbox-card:hover { background-color: rgba(16, 185, 129, 0.04); border-color: rgba(16, 185, 129, 0.3); }
+    .checkbox-card.selected { background-color: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.6); box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.6); }
+  </style>
+</head>
+<body class="min-h-screen w-full relative overflow-x-hidden flex items-center bg-slate-950 font-sans">
+
+  <div class="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+    <div class="absolute inset-0 bg-cover bg-center no-repeat select-none" style="background-image: url('redmensione_essa_imagem,_quero_ela_202605171312.jpeg');"></div>
+    <div class="absolute inset-0 bg-gradient-to-r from-slate-950/15 via-slate-950/45 to-slate-950/80 z-0"></div>
+  </div>
+
+  <div class="relative z-10 w-full max-w-7xl mx-auto flex items-center justify-end px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
+    <div class="w-full max-w-xl">
+      
+      <!-- Ficha Form Card -->
+      <div id="main-card" class="bg-white/90 backdrop-blur-md ring-1 ring-black/10 shadow-2xl rounded-3xl p-5 sm:p-8 transition-all duration-500">
+        
+        <div class="text-center mb-6 border-b border-neutral-200/50 pb-5">
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 font-outfit">AD Fonte de Vida</h1>
+          <p class="text-xs sm:text-sm text-neutral-500 font-light mt-1">Ficha de Integração de Visitantes</p>
+        </div>
+
+        <form id="visitor-form" class="space-y-5" onsubmit="handleFormSubmit(event)">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <div class="sm:col-span-2">
+              <label for="fullName" class="block text-xs font-semibold text-neutral-700 mb-1">Nome Completo<span class="text-neutral-400"> *</span></label>
+              <div class="relative">
+                <input id="fullName" name="fullName" type="text" required placeholder="Digite seu nome completo" class="w-full pl-3 pr-3 py-2.5 text-sm rounded-xl ring-1 ring-black/10 focus:ring-2 focus:ring-neutral-900 outline-none bg-white text-neutral-900">
+              </div>
+            </div>
+
+            <div class="sm:col-span-1">
+              <label for="whatsapp" class="block text-xs font-semibold text-neutral-700 mb-1">WhatsApp<span class="text-neutral-400"> *</span></label>
+              <div class="relative">
+                <input id="whatsapp" name="whatsapp" type="tel" required placeholder="(99) 99999-9999" class="w-full pl-3 pr-3 py-2.5 text-sm rounded-xl ring-1 ring-black/10 focus:ring-2 focus:ring-neutral-900 outline-none bg-white text-neutral-900">
+              </div>
+            </div>
+
+            <div class="sm:col-span-1">
+              <label for="birthDate" class="block text-xs font-semibold text-neutral-700 mb-1 flex items-center justify-between">
+                <span>Nascimento<span class="text-neutral-400"> *</span></span>
+                <span id="age-badge" class="hidden rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-600 border border-emerald-500/20"></span>
+              </label>
+              <div class="relative">
+                <input id="birthDate" name="birthDate" type="date" required class="w-full px-3 py-2.5 text-sm rounded-xl ring-1 ring-black/10 focus:ring-2 focus:ring-neutral-900 outline-none bg-white text-neutral-900">
+              </div>
+            </div>
+
+            <div class="sm:col-span-2">
+              <label for="gender" class="block text-xs font-semibold text-neutral-700 mb-1">Sexo<span class="text-neutral-400"> *</span></label>
+              <select id="gender" name="gender" required class="w-full px-3 py-2.5 text-sm rounded-xl ring-1 ring-black/10 focus:ring-2 focus:ring-neutral-900 outline-none bg-white text-neutral-900 appearance-none">
+                <option value="" disabled selected>Selecione</option>
+                <option value="M">Masculino</option>
+                <option value="F">Feminino</option>
+              </select>
+            </div>
+
+            <div class="sm:col-span-2 pt-2 border-t border-neutral-200/50 mt-2">
+              <h3 class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-3">Endereço de Residência</h3>
+            </div>
+
+            <div class="sm:col-span-1">
+              <label for="cep" class="block text-xs font-semibold text-neutral-700 mb-1 flex items-center justify-between">
+                <span>CEP<span class="text-neutral-400"> *</span></span>
+                <span id="cep-loading" class="hidden text-[10px] text-emerald-600 font-medium">Buscando...</span>
+              </label>
+              <input id="cep" name="cep" type="text" required placeholder="00000-000" class="w-full px-3 py-2.5 text-sm rounded-xl ring-1 ring-black/10 focus:ring-2 focus:ring-neutral-900 outline-none bg-white text-neutral-900">
+            </div>
+
+            <div class="sm:col-span-1">
+              <label for="neighborhood" class="block text-xs font-semibold text-neutral-700 mb-1">Bairro<span class="text-neutral-400"> *</span></label>
+              <input id="neighborhood" name="neighborhood" type="text" required placeholder="Bairro" class="w-full px-3 py-2.5 text-sm rounded-xl ring-1 ring-black/10 focus:ring-2 focus:ring-neutral-900 outline-none bg-white text-neutral-900">
+            </div>
+
+            <div class="sm:col-span-2 pt-2 border-t border-neutral-200/50 mt-2">
+              <h3 class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Decisões e Integração</h3>
+            </div>
+
+            <div class="sm:col-span-2">
+              <div id="card-decision" class="checkbox-card border border-neutral-200/60 rounded-2xl p-4 flex items-start gap-3 cursor-pointer select-none bg-white/40">
+                <div class="flex items-center h-5">
+                  <input id="isDecision" name="isDecision" type="checkbox" class="hidden">
+                  <div class="custom-check-box h-5 w-5 rounded-lg border border-neutral-300 flex items-center justify-center text-white bg-white transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 opacity-0 transition-opacity"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg>
+                  </div>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-neutral-800 leading-none">É uma Ficha de Decisão</p>
+                  <p class="text-[11px] text-neutral-500 mt-1">Marque se o visitante tomou uma decisão por Cristo.</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="sm:col-span-2">
+              <div id="card-cells" class="checkbox-card border border-neutral-200/60 rounded-2xl p-4 flex items-start gap-3 cursor-pointer select-none bg-white/40">
+                <div class="flex items-center h-5">
+                  <input id="wantsCells" name="wantsCells" type="checkbox" class="hidden">
+                  <div class="custom-check-box h-5 w-5 rounded-lg border border-neutral-300 flex items-center justify-center text-white bg-white transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3.5 h-3.5 opacity-0 transition-opacity"><path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clip-rule="evenodd" /></svg>
+                  </div>
+                </div>
+                <div class="min-w-0">
+                  <p class="text-sm font-semibold text-neutral-800 leading-none">Deseja Célula</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <button id="btn-submit" type="submit" class="w-full flex items-center justify-center rounded-xl bg-neutral-900 text-white px-4 py-3.5 text-sm font-medium hover:bg-neutral-800 transition-colors mt-2">
+            Salvar e Processar
+          </button>
+        </form>
+      </div>
+
+      <!-- Success Card -->
+      <div id="success-card" class="hidden bg-white/95 backdrop-blur-md ring-1 ring-black/10 shadow-2xl rounded-3xl p-6 sm:p-8 text-center transition-all duration-500 scale-95 opacity-0">
+        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-neutral-900 font-outfit">Cadastro Concluído!</h2>
+        <p id="success-greeting" class="text-sm text-neutral-700 mt-2 font-medium"></p>
+        
+        <div class="mt-6 bg-slate-900 text-left rounded-2xl p-5 border border-white/5 space-y-4 text-xs">
+          <div class="flex items-center gap-2 border-b border-white/10 pb-2">
+            <span class="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span class="font-bold text-emerald-400 font-mono tracking-tight uppercase text-[10px]">Matching Processado</span>
+          </div>
+          <div class="bg-slate-950 p-4 rounded-xl border border-white/5 mt-2 text-center text-xs text-neutral-400">
+            A ficha foi armazenada no Supabase Database e o sistema já alocou ou posicionou o visitante na fila de integração. Em breve nossa equipe entrará em contato!
+          </div>
+        </div>
+
+        <button onclick="window.location.reload()" class="mt-6 w-full rounded-xl border border-neutral-300 hover:bg-neutral-50 text-neutral-700 px-4 py-3 text-xs font-semibold">
+          Cadastrar Novo Visitante
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // SUPABASE INIT
+    const supabaseUrl = 'https://txcxqjzkfkkbnegebyjx.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4Y3hxanprZmtrYm5lZ2VieWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjQyOTIsImV4cCI6MjA5NDkwMDI5Mn0.KnxJvGnwGxEumDDZyso8jhCGnLP18Rf_Q3RkHk3ktdM';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Masks and UI Events
+    const whatsappInput = document.getElementById('whatsapp');
+    whatsappInput.addEventListener('input', (e) => {
+      let x = e.target.value.replace(/\D/g, '').match(/(\d{0,2})(\d{0,5})(\d{0,4})/);
+      e.target.value = !x[2] ? x[1] : '(' + x[1] + ') ' + x[2] + (x[3] ? '-' + x[3] : '');
+    });
+
+    const cepInput = document.getElementById('cep');
+    cepInput.addEventListener('input', async (e) => {
+      let val = e.target.value.replace(/\D/g, '');
+      if (val.length > 8) val = val.substring(0, 8);
+      let x = val.match(/(\d{0,5})(\d{0,3})/);
+      e.target.value = !x[2] ? x[1] : x[1] + '-' + x[2];
+
+      if (val.length === 8) {
+        document.getElementById('cep-loading').classList.remove('hidden');
+        try {
+          const res = await fetch(`https://viacep.com.br/ws/${val}/json/`);
+          const data = await res.json();
+          if(!data.erro) {
+            document.getElementById('neighborhood').value = data.bairro || '';
+          }
+        } catch(e){}
+        document.getElementById('cep-loading').classList.add('hidden');
+      }
+    });
+
+    const birthDateInput = document.getElementById('birthDate');
+    const ageBadge = document.getElementById('age-badge');
+    let calculatedAge = 0;
+    let calculatedFaixa = '';
+
+    birthDateInput.addEventListener('change', (e) => {
+      const birthDate = new Date(e.target.value);
+      if (isNaN(birthDate.getTime())) return;
+      const today = new Date();
+      calculatedAge = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) calculatedAge--;
+
+      if (calculatedAge <= 17) calculatedFaixa = 'adolescente';
+      else if (calculatedAge <= 29) calculatedFaixa = 'jovem';
+      else if (calculatedAge <= 59) calculatedFaixa = 'adulto';
+      else calculatedFaixa = 'melhor_idade';
+
+      ageBadge.textContent = `${calculatedAge} anos (${calculatedFaixa})`;
+      ageBadge.classList.remove('hidden');
+    });
+
+    function setupCustomCheckbox(cardId, inputId) {
+      const cardElement = document.getElementById(cardId);
+      const input = document.getElementById(inputId);
+      const indicator = cardElement.querySelector('.custom-check-box');
+      const checkIcon = indicator.querySelector('svg');
+
+      cardElement.addEventListener('click', () => {
+        input.checked = !input.checked;
+        if (input.checked) {
+          cardElement.classList.add('selected');
+          indicator.classList.replace('bg-white', 'bg-emerald-500');
+          indicator.classList.replace('border-neutral-300', 'border-emerald-500');
+          checkIcon.classList.remove('opacity-0');
+        } else {
+          cardElement.classList.remove('selected');
+          indicator.classList.replace('bg-emerald-500', 'bg-white');
+          indicator.classList.replace('border-emerald-500', 'border-neutral-300');
+          checkIcon.classList.add('opacity-0');
+        }
+      });
+    }
+    setupCustomCheckbox('card-decision', 'isDecision');
+    setupCustomCheckbox('card-cells', 'wantsCells');
+
+    // Matching Motor in Frontend
+    async function realizarMatchingSupabase(ficha) {
+      const { data: membros, error } = await supabase.from('membros').select('*').eq('ativo', true);
+      const { data: relatorios } = await supabase.from('fichas').select('mensageiroId, status');
+      if (error || !membros) return null;
+
+      // Filter and Calculate Loads
+      let elegiveis = membros.filter(m => m.cargaMax > 0);
+      elegiveis = elegiveis.map(m => {
+        const cargaAt = relatorios.filter(r => r.mensageiroId === m.id && r.status === 'pendente').length;
+        return { ...m, cargaAtual: cargaAt };
+      }).filter(m => m.cargaAtual < m.cargaMax);
+
+      if (ficha.decisao === true) {
+        elegiveis = elegiveis.filter(m => m.role === 'pastor');
+      } else {
+        elegiveis = elegiveis.filter(m => m.role !== 'pastor');
+      }
+
+      elegiveis = elegiveis.filter(m => m.sexo === ficha.sexo);
+      elegiveis = elegiveis.filter(m => m.faixasAtendimento && m.faixasAtendimento.includes(ficha.faixaEtaria));
+
+      if (elegiveis.length === 0) return null; 
+
+      const noMesmoBairro = elegiveis.filter(m => m.bairro.toLowerCase().trim() === ficha.bairro.toLowerCase().trim());
+      let grupoAlvo = noMesmoBairro.length > 0 ? noMesmoBairro : elegiveis;
+
+      grupoAlvo.sort((a, b) => a.cargaAtual - b.cargaAtual);
+      return grupoAlvo[0].id;
+    }
+
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+      btn.innerText = "Processando no Supabase...";
+      btn.disabled = true;
+
+      const novaFicha = {
+        nomeVisitante: document.getElementById('fullName').value,
+        idade: calculatedAge,
+        faixaEtaria: calculatedFaixa || 'adulto',
+        sexo: document.getElementById('gender').value,
+        whatsapp: document.getElementById('whatsapp').value.replace(/\D/g, ''),
+        bairro: document.getElementById('neighborhood').value,
+        decisao: document.getElementById('isDecision').checked,
+        celula: document.getElementById('wantsCells').checked,
+        status: 'pendente',
+        fluxo_pastoral: false,
+        timestamp: Date.now()
+      };
+
+      // Realiza Matching Consultando DB Real
+      const mensageiroId = await realizarMatchingSupabase(novaFicha);
+      novaFicha.mensageiroId = mensageiroId;
+
+      // Salva no DB Real
+      const { error } = await supabase.from('fichas').insert([novaFicha]);
+      
+      if(error) {
+        alert("Erro ao salvar Ficha: " + error.message);
+        btn.innerText = "Tentar Novamente";
+        btn.disabled = false;
+        return;
+      }
+
+      document.getElementById('success-greeting').textContent = `Seja muito bem-vindo(a), ${novaFicha.nomeVisitante}!`;
+      
+      const mainCard = document.getElementById('main-card');
+      const successCard = document.getElementById('success-card');
+      mainCard.classList.add('hidden');
+      successCard.classList.remove('hidden');
+      successCard.classList.remove('scale-95', 'opacity-0');
+      successCard.classList.add('scale-100', 'opacity-100');
+    }
+  </script>
+</body>
+</html>
