@@ -1,0 +1,8 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/", "destination": "/ficha-visitante" },
+    { "source": "/admin", "destination": "/area-admin" },
+    { "source": "/mensageiro", "destination": "/area-mensageiro" }
+  ]
+}
