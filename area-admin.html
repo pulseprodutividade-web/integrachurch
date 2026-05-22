@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IntegraChurch - Painel Administrativo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- SUPABASE JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+    .table-container { scrollbar-color: rgba(255,255,255,0.2) transparent; }
+  </style>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-neutral-950 text-white min-h-screen flex flex-col relative">
+
+  <div class="fixed inset-0 z-0">
+    <img src="https://hoirqrkdgbmvpwutwuwj.supabase.co/storage/v1/object/public/assets/assets/60668e31-2150-424e-b292-05bfdda254e0_1600w.jpg" alt="Background" class="h-full w-full object-cover opacity-30">
+    <div class="absolute inset-0 bg-gradient-to-br from-black/95 via-black/80 to-transparent"></div>
+  </div>
+
+  <div class="relative z-10 flex-1 w-full">
+
+    <main id="login-view" class="flex-1 flex items-center justify-center p-4 min-h-screen">
+      <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+          <h2 class="text-white tracking-tight text-4xl font-semibold leading-[1.05]">IntegraChurch</h2>
+          <p class="text-neutral-300 mt-2 text-sm">Governança e Administração</p>
+        </div>
+        <div class="rounded-2xl bg-white/90 backdrop-blur ring-1 ring-black/10 shadow-lg p-5 sm:p-7">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <p class="text-[11px] text-neutral-500 uppercase tracking-wider font-semibold">Acesso Restrito</p>
+              <h3 class="mt-1 text-2xl font-semibold tracking-tight text-neutral-900">Login Liderança</h3>
+            </div>
+            <div class="h-10 w-10 rounded-lg bg-neutral-900 text-white flex items-center justify-center shadow">
+              <i data-lucide="shield" class="h-5 w-5"></i>
+            </div>
+          </div>
+          <form id="login-form" class="space-y-4">
+            <div>
+              <label for="login-username" class="block text-xs font-medium text-neutral-600">Usuário<span class="text-neutral-400"> *</span></label>
+              <div class="relative mt-1">
+                <i data-lucide="user" class="h-4 w-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input id="login-username" type="text" required placeholder="admin.geral" class="w-full pl-9 pr-3 py-2.5 text-sm text-neutral-900 rounded-xl ring-1 ring-black/10 focus:ring-2 focus:ring-emerald-500 outline-none bg-white placeholder:text-neutral-400">
+              </div>
+            </div>
+            <div>
+              <label for="login-password" class="block text-xs font-medium text-neutral-600">Senha<span class="text-neutral-400"> *</span></label>
+              <div class="relative mt-1">
+                <i data-lucide="lock" class="h-4 w-4 text-neutral-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input id="login-password" type="password" required placeholder="..." class="w-full pl-9 pr-3 py-2.5 text-sm text-neutral-900 rounded-xl ring-1 ring-black/10 focus:ring-2 focus:ring-emerald-500 outline-none bg-white placeholder:text-neutral-400">
+              </div>
+            </div>
+            <div id="login-error" class="hidden text-rose-500 text-xs font-medium text-center mt-2"></div>
+            <button id="btn-login-submit" type="submit" class="w-full mt-2 inline-flex items-center justify-center rounded-xl bg-neutral-900 text-white px-4 py-3 text-sm font-medium hover:bg-neutral-800 transition-colors shadow-md">
+              Acessar Painel
+            </button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <main id="dashboard-view" class="hidden flex-col p-4 sm:p-8 max-w-7xl mx-auto w-full min-h-screen">
+      
+      <header class="flex flex-col sm:flex-row sm:items-center justify-between mb-8 pb-4 border-b border-white/10 shrink-0 gap-4">
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-semibold text-white tracking-tight" id="dashboard-title">Conselho Diretivo</h1>
+          <p class="text-neutral-400 text-sm mt-1" id="dashboard-subtitle">Conectado ao Supabase Cloud Database.</p>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <button onclick="simularNovaFicha()" class="hidden sm:inline-flex items-center justify-center rounded-xl bg-indigo-600/20 text-indigo-300 ring-1 ring-indigo-500/50 px-3 py-2 text-xs font-medium hover:bg-indigo-600/40 transition-colors shadow-sm">
+            <i data-lucide="zap" class="h-3 w-3 mr-1.5"></i>
+            Simular Roteamento (Cloud)
+          </button>
+          
+          <div class="hidden sm:inline-flex items-center gap-3 rounded-2xl bg-white/10 backdrop-blur ring-1 ring-white/15 p-2 pr-3">
+            <div class="h-10 w-10 rounded-xl bg-neutral-900 ring-1 ring-neutral-700 flex items-center justify-center shadow-inner">
+              <i data-lucide="shield-check" class="h-5 w-5 text-emerald-400"></i>
+            </div>
+            <div class="min-w-0 pr-2">
+              <p class="text-[10px] text-emerald-400 leading-none uppercase font-semibold" id="user-role-display">Nível: Admin</p>
+              <p class="text-white font-medium tracking-tight truncate text-sm" id="user-name-display">Carregando...</p>
+            </div>
+            <button id="btn-logout" class="ml-1 inline-flex items-center justify-center rounded-lg bg-black/40 text-neutral-300 p-2 hover:bg-black/60 transition-colors" title="Sair">
+              <i data-lucide="log-out" class="h-4 w-4"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <section class="mb-10">
+        <h2 class="text-white text-lg font-semibold mb-4">Visão Geral</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="rounded-2xl bg-white/5 p-5 flex flex-col justify-between border-b-2 border-emerald-500/50">
+            <p class="text-neutral-400 text-xs font-medium uppercase tracking-wider text-emerald-200">Conversão</p>
+            <p class="text-3xl font-semibold text-white mt-2" id="kpi-conversao">0%</p>
+          </div>
+          <div class="rounded-2xl bg-white/5 p-5 flex flex-col justify-between border-b-2 border-rose-500/50">
+            <p class="text-neutral-400 text-xs font-medium uppercase tracking-wider text-rose-200">Decisões</p>
+            <p class="text-3xl font-semibold text-white mt-2" id="kpi-decisoes">0</p>
+          </div>
+          <div class="rounded-2xl bg-white/5 p-5 flex flex-col justify-between border-b-2 border-amber-500/50">
+            <p class="text-neutral-400 text-xs font-medium uppercase tracking-wider text-amber-200">Fila Global</p>
+            <p class="text-3xl font-semibold text-amber-400 mt-2" id="kpi-fichas-fila">0</p>
+          </div>
+          <div class="rounded-2xl bg-white/5 p-5 flex flex-col justify-between border-b-2 border-blue-500/50">
+            <p class="text-neutral-400 text-xs font-medium uppercase tracking-wider text-blue-200">Membros</p>
+            <p class="text-3xl font-semibold text-white mt-2" id="kpi-equipe">0</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO 2: GESTÃO DE EQUIPE -->
+      <section class="mb-10">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <h2 class="text-white text-lg font-semibold">Liderança e Equipes</h2>
+          <button onclick="openMembroModal()" class="inline-flex items-center justify-center rounded-xl bg-emerald-600 text-white px-4 py-2 text-sm font-medium hover:bg-emerald-700">
+            Adicionar Membro
+          </button>
+        </div>
+        <div class="bg-white/5 rounded-2xl overflow-hidden">
+          <div class="overflow-x-auto table-container">
+            <table class="w-full text-left text-sm text-neutral-300">
+              <thead class="bg-white/5 text-xs uppercase font-semibold text-neutral-400 border-b border-white/10">
+                <tr>
+                  <th class="px-6 py-4">Membro / Contato</th>
+                  <th class="px-6 py-4">Nível</th>
+                  <th class="px-6 py-4">Regras</th>
+                  <th class="px-6 py-4">Carga Atual</th>
+                  <th class="px-6 py-4 text-right">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="lista-membros" class="divide-y divide-white/10"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SEÇÃO 3: RELATÓRIOS -->
+      <section class="mb-10 flex-1 flex flex-col">
+        <h2 class="text-white text-lg font-semibold mb-4">Relatórios na Nuvem</h2>
+        
+        <div class="flex flex-wrap gap-3 mb-4">
+          <div class="relative flex-1 min-w-[200px]">
+            <input type="text" id="filtro-nome" onkeyup="renderLogs()" placeholder="Buscar visitante..." class="w-full pl-3 pr-3 py-2 text-sm text-white rounded-lg bg-white/5 ring-1 ring-white/10 outline-none">
+          </div>
+          <select id="filtro-status" onchange="renderLogs()" class="px-3 py-2 text-sm text-neutral-300 rounded-lg bg-white/5 ring-1 ring-white/10 [&>option]:bg-neutral-900">
+            <option value="todos">Todos</option>
+            <option value="pendente">Apenas Pendentes</option>
+            <option value="fila_global">Fila Global</option>
+            <option value="concluido">Concluídos</option>
+          </select>
+          <select id="filtro-mensageiro" onchange="renderLogs()" class="px-3 py-2 text-sm text-neutral-300 rounded-lg bg-white/5 ring-1 ring-white/10 [&>option]:bg-neutral-900"></select>
+        </div>
+
+        <div class="bg-white/95 rounded-2xl overflow-hidden flex-1">
+          <div class="overflow-x-auto table-container max-h-[500px]">
+            <table class="w-full text-left text-sm text-neutral-600">
+              <thead class="bg-neutral-50 text-xs uppercase font-semibold text-neutral-500 border-b border-neutral-200 sticky top-0">
+                <tr>
+                  <th class="px-6 py-4">Visitante</th>
+                  <th class="px-6 py-4">Destino</th>
+                  <th class="px-6 py-4">Status</th>
+                  <th class="px-6 py-4">Última Ação</th>
+                </tr>
+              </thead>
+              <tbody id="lista-logs" class="divide-y divide-neutral-100"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      
+    </main>
+  </div>
+
+  <!-- MODAL MEMBRO -->
+  <div id="membro-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeMembroModal()"></div>
+    <div class="relative w-full max-w-lg rounded-2xl bg-neutral-900 shadow-2xl ring-1 ring-white/10 overflow-hidden flex flex-col max-h-[95vh]">
+      <div class="px-6 py-4 border-b border-white/10 flex items-center justify-between">
+        <h3 class="text-white font-semibold text-lg" id="modal-titulo">Membro</h3>
+        <button onclick="closeMembroModal()" class="text-neutral-400 hover:text-white"><i data-lucide="x" class="h-5 w-5"></i></button>
+      </div>
+      <div class="p-6 overflow-y-auto">
+        <form id="form-membro" class="space-y-4">
+          <input type="hidden" id="modal-membro-id">
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-medium text-neutral-400 mb-1">Nome Completo</label>
+              <input id="form-nome" type="text" onkeyup="gerarCredenciais(this.value)" required class="w-full px-3 py-2 text-sm text-white rounded-xl bg-neutral-800 ring-1 ring-white/10 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-neutral-400 mb-1">WhatsApp</label>
+              <input id="form-whatsapp" type="text" required class="w-full px-3 py-2 text-sm text-white rounded-xl bg-neutral-800 ring-1 ring-white/10 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-neutral-400 mb-1">Equipe</label>
+              <input id="form-equipe" type="text" required class="w-full px-3 py-2 text-sm text-white rounded-xl bg-neutral-800 ring-1 ring-white/10 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-neutral-400 mb-1">Bairro</label>
+              <input id="form-bairro" type="text" required class="w-full px-3 py-2 text-sm text-white rounded-xl bg-neutral-800 ring-1 ring-white/10 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-neutral-400 mb-1">Nível de Acesso</label>
+              <select id="form-role" class="w-full px-3 py-2 text-sm text-white rounded-xl bg-neutral-800 ring-1 ring-white/10 outline-none [&>option]:bg-neutral-900">
+                <option value="mensageiro">Mensageiro Padrão</option>
+                <option value="coordenador">Coordenador</option>
+                <option value="pastor">Pastor VIP</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-neutral-400 mb-1">Sexo</label>
+              <select id="form-sexo" class="w-full px-3 py-2 text-sm text-white rounded-xl bg-neutral-800 ring-1 ring-white/10 outline-none [&>option]:bg-neutral-900">
+                <option value="M">Masculino</option>
+                <option value="F">Feminino</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-neutral-400 mb-2">Faixas Etárias</label>
+            <div class="grid grid-cols-2 gap-2 text-sm text-neutral-300">
+              <label><input type="checkbox" name="faixa" value="adolescente"> Adolescente</label>
+              <label><input type="checkbox" name="faixa" value="jovem"> Jovem</label>
+              <label><input type="checkbox" name="faixa" value="adulto"> Adulto</label>
+              <label><input type="checkbox" name="faixa" value="melhor_idade"> Melhor Idade</label>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-neutral-400 mb-1">Carga Máxima de Fichas</label>
+            <input id="form-carga-max" type="number" min="0" value="5" class="w-full px-3 py-2 text-sm text-white rounded-xl bg-neutral-800 ring-1 ring-white/10 outline-none">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-[10px] text-neutral-500 mb-1">Usuário</label>
+              <input id="form-username" type="text" readonly class="w-full px-3 py-2 text-sm text-neutral-300 rounded-lg bg-black/40 ring-1 ring-black/20 outline-none">
+            </div>
+            <div>
+              <label class="block text-[10px] text-neutral-500 mb-1">Senha</label>
+              <input id="form-senha" type="text" readonly class="w-full px-3 py-2 text-sm text-neutral-300 rounded-lg bg-black/40 ring-1 ring-black/20 outline-none">
+            </div>
+          </div>
+          
+          <button type="button" onclick="copiarCredenciais()" class="w-full flex items-center justify-center gap-2 rounded-lg bg-white/5 text-neutral-400 px-3 py-2 text-xs hover:bg-white/10 ring-1 ring-white/10 transition-colors">
+            <i data-lucide="copy" class="h-3 w-3"></i>
+            Copiar Credenciais para WhatsApp
+          </button>
+
+          <div class="flex gap-3 pt-2">
+            <button type="button" id="btn-delete-membro" class="hidden rounded-xl bg-rose-500/10 text-rose-500 px-4 py-3 text-sm font-medium hover:bg-rose-500/20 transition-colors" onclick="deleteMembroAtual()">Excluir</button>
+            <button type="submit" id="btn-save-membro" class="flex-1 rounded-xl bg-emerald-600 text-white px-4 py-3 text-sm font-medium hover:bg-emerald-700">Salvar na Nuvem</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- REATRIBUIÇÃO MODAL -->
+  <div id="reatribuicao-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeReatribuicaoModal()"></div>
+    <div class="relative w-full max-w-sm rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 overflow-hidden p-5">
+        <form id="form-reatribuir" class="space-y-4">
+          <input type="hidden" id="reatrib-ficha-id">
+          <label class="block text-sm font-semibold">Atribuir Visitante</label>
+          <select id="reatrib-novo-mensageiro" class="w-full px-3 py-2.5 text-sm rounded-xl bg-white ring-1 ring-neutral-300 outline-none"></select>
+          <button type="submit" id="btn-reatrib" class="w-full rounded-xl bg-emerald-600 text-white px-4 py-3 text-sm">Salvar Atribuição</button>
+        </form>
+    </div>
+  </div>
+
+  <script>
+    const supabaseUrl = 'https://txcxqjzkfkkbnegebyjx.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR4Y3hxanprZmtrYm5lZ2VieWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjQyOTIsImV4cCI6MjA5NDkwMDI5Mn0.KnxJvGnwGxEumDDZyso8jhCGnLP18Rf_Q3RkHk3ktdM';
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    let loggedUser = null;
+    let localMembros = [];
+    let localFichas = [];
+
+    // DATA FETCH
+    async function fetchData() {
+      const { data: m } = await supabaseClient.from('membros').select('*');
+      const { data: f } = await supabaseClient.from('fichas').select('*');
+      localMembros = m || [];
+      localFichas = f || [];
+      renderAdminView();
+    }
+
+    function getRoleBadge(role) {
+      if(role === 'admin') return '<span class="text-rose-400 font-bold text-xs">Admin</span>';
+      if(role === 'pastor') return '<span class="text-purple-400 font-bold text-xs">Pastor</span>';
+      if(role === 'coordenador') return '<span class="text-blue-400 font-bold text-xs">Coord</span>';
+      return '<span class="text-neutral-400 text-xs">Mensageiro</span>';
+    }
+
+    function renderAdminView() {
+      if(!loggedUser) return;
+      let membrosVisiveis = localMembros;
+      let fichasVisiveis = localFichas;
+      
+      if(loggedUser.role === 'coordenador') {
+        membrosVisiveis = localMembros.filter(m => m.equipe === loggedUser.equipe);
+        const ids = membrosVisiveis.map(m => m.id);
+        fichasVisiveis = localFichas.filter(f => ids.includes(f.mensageiroid));
+      }
+
+      // KPIs
+      document.getElementById('kpi-conversao').innerText = fichasVisiveis.length ? Math.round((fichasVisiveis.filter(f=>f.status==='concluido').length / fichasVisiveis.length)*100)+'%' : '0%';
+      document.getElementById('kpi-decisoes').innerText = fichasVisiveis.filter(f=>f.decisao).length;
+      document.getElementById('kpi-fichas-fila').innerText = fichasVisiveis.filter(f=>f.mensageiroid === null).length;
+      document.getElementById('kpi-equipe').innerText = membrosVisiveis.filter(m=>m.ativo).length;
+
+      // Table Membros
+      document.getElementById('lista-membros').innerHTML = membrosVisiveis.map(m => {
+        const cargaAtual = localFichas.filter(f => f.mensageiroid === m.id && f.status === 'pendente').length;
+        return `
+          <tr class="hover:bg-white/5">
+            <td class="px-6 py-4">${m.nome}</td>
+            <td class="px-6 py-4">${getRoleBadge(m.role)}</td>
+            <td class="px-6 py-4 text-xs text-neutral-400">${m.bairro}</td>
+            <td class="px-6 py-4 text-emerald-400 font-bold">${cargaAtual} / ${m.cargamax}</td>
+            <td class="px-6 py-4 text-right">
+              <button onclick="editMembro(${m.id})" class="text-neutral-400 hover:text-white px-2">Editar</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      renderLogs();
+    }
+
+    function renderLogs() {
+      const sel = document.getElementById('filtro-status').value;
+      const t = document.getElementById('lista-logs');
+      t.innerHTML = localFichas.filter(f => sel==='todos' || (sel==='fila_global' && f.mensageiroid===null) || (sel==='pendente' && f.mensageiroid!==null && f.status==='pendente') || (sel==='concluido' && f.status==='concluido'))
+      .sort((a,b)=>b.timestamp - a.timestamp).map(f => {
+        const m = f.mensageiroid ? localMembros.find(x=>x.id===f.mensageiroid)?.nome : 'Nenhum';
+        const d = new Date(f.timestamp).toLocaleDateString('pt-BR');
+        let btn = '';
+        if(f.mensageiroid === null) {
+          btn = `<button onclick="openReatribuicaoModal(${f.id})" class="text-amber-500 font-bold text-xs bg-amber-50 px-2 py-1 rounded">Atribuir Manual</button>`;
+        } else {
+          btn = `<span class="text-${f.status==='concluido'?'emerald':'indigo'}-500 text-xs font-bold uppercase">${f.status}</span>`;
+        }
+        return `
+          <tr>
+            <td class="px-6 py-4"><b>${f.nomevisitante}</b> <span class="text-xs text-neutral-400">(${f.faixaetaria})</span></td>
+            <td class="px-6 py-4 text-sm">${m}</td>
+            <td class="px-6 py-4">${btn}</td>
+            <td class="px-6 py-4 text-xs">${d}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // AUTH
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      document.getElementById('btn-login-submit').innerText = 'Autenticando...';
+      const u = document.getElementById('login-username').value.trim();
+      const p = document.getElementById('login-password').value.trim();
+      
+      try {
+        const { data, error } = await supabaseClient.from('membros').select('*').eq('username', u).eq('senha', p);
+        console.log("Supabase Login Response:", data, error);
+        
+        if(error) {
+          document.getElementById('login-error').innerText = 'Erro API: ' + error.message;
+          document.getElementById('login-error').classList.remove('hidden');
+        } else if(data && data.length > 0 && (data[0].role === 'admin' || data[0].role === 'coordenador')) {
+          loggedUser = data[0];
+          document.getElementById('login-view').classList.add('hidden');
+          document.getElementById('dashboard-view').classList.remove('hidden');
+          document.getElementById('dashboard-view').classList.add('flex');
+          document.getElementById('user-name-display').innerText = loggedUser.nome;
+          document.getElementById('user-role-display').innerText = `Nível: ${loggedUser.role}`;
+          await fetchData(); // Load all DB!
+        } else {
+          document.getElementById('login-error').innerText = 'Acesso Negado (Usuário não encontrado ou sem permissão)';
+          document.getElementById('login-error').classList.remove('hidden');
+        }
+      } catch (err) {
+        console.error("Critical Login Error:", err);
+        document.getElementById('login-error').innerText = 'Erro Critico: ' + err.message;
+        document.getElementById('login-error').classList.remove('hidden');
+      }
+      document.getElementById('btn-login-submit').innerText = 'Acessar Painel';
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => { location.reload(); });
+
+    // MEMBRO CRUD
+    function gerarCredenciais(nome) {
+      if(document.getElementById('modal-membro-id').value) return;
+      document.getElementById('form-username').value = nome.split(' ')[0].toLowerCase() + '.' + Math.floor(Math.random()*1000);
+      document.getElementById('form-senha').value = Math.random().toString(36).substring(2,6);
+    }
+
+    function openMembroModal(id = null) {
+      document.getElementById('form-membro').reset();
+      document.getElementById('modal-membro-id').value = id || '';
+      document.querySelectorAll('input[name="faixa"]').forEach(cb => cb.checked = false);
+
+      if(id) {
+        const m = localMembros.find(x => x.id === id);
+        if(m) {
+          document.getElementById('form-nome').value = m.nome;
+          document.getElementById('form-username').value = m.username;
+          document.getElementById('form-senha').value = m.senha;
+          document.getElementById('form-equipe').value = m.equipe;
+          document.getElementById('form-whatsapp').value = m.whatsapp;
+          document.getElementById('form-bairro').value = m.bairro;
+          document.getElementById('form-role').value = m.role;
+          document.getElementById('form-sexo').value = m.sexo;
+          document.getElementById('form-carga-max').value = m.cargamax;
+          if(m.faixasatendimento) m.faixasatendimento.forEach(f => {
+            const cb = document.querySelector(`input[name="faixa"][value="${f}"]`);
+            if(cb) cb.checked = true;
+          });
+        }
+        document.getElementById('btn-delete-membro').classList.remove('hidden');
+      } else {
+        document.getElementById('btn-delete-membro').classList.add('hidden');
+      }
+      document.getElementById('membro-modal').classList.remove('hidden');
+    }
+    function closeMembroModal() { document.getElementById('membro-modal').classList.add('hidden'); }
+    window.editMembro = function(id) { openMembroModal(id); }
+
+    window.copiarCredenciais = function() {
+      const u = document.getElementById('form-username').value;
+      const p = document.getElementById('form-senha').value;
+      if(!u || !p) return;
+      const txt = `Olá! Seu acesso ao IntegraChurch foi liberado:\n\n*Usuário:* ${u}\n*Senha:* ${p}\n\nAcesse pelo link oficial para ver suas fichas.`;
+      navigator.clipboard.writeText(txt).then(() => {
+        alert("Copiado! Agora é só colar e enviar pelo WhatsApp.");
+      }).catch(() => {
+        alert("Erro ao copiar. Seu navegador pode ter bloqueado esta ação.");
+      });
+    }
+
+    document.getElementById('form-membro').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      document.getElementById('btn-save-membro').innerText = "Salvando...";
+      const id = document.getElementById('modal-membro-id').value;
+      const obj = {
+        nome: document.getElementById('form-nome').value,
+        username: document.getElementById('form-username').value,
+        senha: document.getElementById('form-senha').value,
+        whatsapp: document.getElementById('form-whatsapp').value,
+        equipe: document.getElementById('form-equipe').value,
+        bairro: document.getElementById('form-bairro').value,
+        role: document.getElementById('form-role').value,
+        sexo: document.getElementById('form-sexo').value,
+        cargamax: parseInt(document.getElementById('form-carga-max').value),
+        faixasatendimento: Array.from(document.querySelectorAll('input[name="faixa"]:checked')).map(c => c.value)
+      };
+
+      let responseError = null;
+      if(id) {
+        const { error } = await supabaseClient.from('membros').update(obj).eq('id', id);
+        responseError = error;
+      } else {
+        const { error } = await supabaseClient.from('membros').insert([obj]);
+        responseError = error;
+      }
+      
+      if(responseError) {
+        alert("Erro do Banco de Dados ao salvar: " + responseError.message);
+        document.getElementById('btn-save-membro').innerText = "Salvar na Nuvem";
+        return;
+      }
+
+      document.getElementById('btn-save-membro').innerText = "Salvar na Nuvem";
+      closeMembroModal();
+      await fetchData();
+    });
+
+    window.deleteMembroAtual = async function() {
+      const id = document.getElementById('modal-membro-id').value;
+      if(!id) return;
+      if(confirm("Tem certeza que deseja excluir permanentemente este membro? As fichas sob responsabilidade dele voltarão para a Fila Global.")) {
+        document.getElementById('btn-delete-membro').innerText = "Excluindo...";
+        await supabaseClient.from('membros').delete().eq('id', id);
+        closeMembroModal();
+        fetchData();
+        document.getElementById('btn-delete-membro').innerText = "Excluir";
+      }
+    }
+
+    // REATRIBUIÇÃO
+    window.openReatribuicaoModal = function(id) {
+      document.getElementById('reatrib-ficha-id').value = id;
+      document.getElementById('reatrib-novo-mensageiro').innerHTML = localMembros.map(m=>`<option value="${m.id}">${m.nome} (${m.cargamax} vagas)</option>`).join('');
+      document.getElementById('reatribuicao-modal').classList.remove('hidden');
+    }
+    window.closeReatribuicaoModal = function() { document.getElementById('reatribuicao-modal').classList.add('hidden'); }
+    document.getElementById('form-reatribuir').addEventListener('submit', async(e)=>{
+      e.preventDefault();
+      document.getElementById('btn-reatrib').innerText = "Processando...";
+      const fId = document.getElementById('reatrib-ficha-id').value;
+      const mId = document.getElementById('reatrib-novo-mensageiro').value;
+      await supabaseClient.from('fichas').update({mensageiroid: parseInt(mId), status: 'pendente', timestamp: Date.now()}).eq('id', fId);
+      closeReatribuicaoModal();
+      document.getElementById('btn-reatrib').innerText = "Salvar Atribuição";
+      fetchData();
+    });
+
+    // SIMULADOR CLOUD
+    window.simularNovaFicha = async function() {
+      const rSexo = Math.random() > 0.5 ? "M" : "F";
+      const novaFicha = {
+        nomevisitante: "Simulador " + Math.floor(Math.random()*100),
+        idade: 25,
+        faixaetaria: "jovem",
+        sexo: rSexo,
+        whatsapp: "110000",
+        bairro: "Centro",
+        decisao: Math.random() > 0.5,
+        celula: true,
+        status: "pendente",
+        fluxo_pastoral: false,
+        timestamp: Date.now()
+      };
+      
+      // Lógica rudimentar local para o simulador
+      let elegiveis = localMembros.filter(m => m.ativo && m.role !== (novaFicha.decisao ? 'mensageiro' : 'pastor'));
+      if(novaFicha.decisao) elegiveis = elegiveis.filter(m=>m.role==='pastor');
+      
+      let mId = elegiveis.length > 0 ? elegiveis[0].id : null;
+      novaFicha.mensageiroid = mId;
+      
+      await supabaseClient.from('fichas').insert([novaFicha]);
+      alert("Simulada na Nuvem e Matching calculado: " + (mId ? 'Atribuido' : 'Fila Global'));
+      fetchData();
+    }
+    
+    lucide.createIcons();
+  </script>
+</body>
+</html>
